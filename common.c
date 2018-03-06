@@ -607,6 +607,9 @@ void common_unload_texture(struct texture_set *texture_set)
 	// do not delete modpath textures directly
 	if(!VREF(texture_set, ogl.external)) glDeleteTextures(VREF(texture_set, ogl.gl_set->textures), VREF(texture_set, texturehandle));
 
+	// remove modpath cache reference
+	ext_cache_release(VPTR(texture_set));
+
 	driver_free(VREF(texture_set, texturehandle));
 	driver_free(VREF(texture_set, ogl.gl_set));
 
@@ -616,9 +619,6 @@ void common_unload_texture(struct texture_set *texture_set)
 	stats.texture_count--;
 
 	if(VREF(texture_set, ogl.external)) stats.external_textures--;
-
-	// remove modpath cache reference
-	ext_cache_release(VPTR(texture_set));
 
 	// remove any other references to this texture
 	gl_check_deferred(VPTR(texture_set));
@@ -679,21 +679,21 @@ bool load_external_texture(struct texture_set *texture_set, struct tex_header *t
 
 		if(trace_loaders) trace("texture file name: %s\n", VREF(tex_header, file.pc_name));
 
-		if(!strnicmp(VREF(tex_header, file.pc_name), "field", strlen("field") - 1)) use_compression = false;
+		if(!_strnicmp(VREF(tex_header, file.pc_name), "field", strlen("field") - 1)) use_compression = false;
 
 		texture = load_texture(VREF(tex_header, file.pc_name), VREF(tex_header, palette_index), VREFP(texture_set, ogl.width), VREFP(texture_set, ogl.height), use_compression);
 
-		if(!strnicmp(VREF(tex_header, file.pc_name), "world", strlen("world") - 1)) gl_set->force_filter = true;
+		if(!_strnicmp(VREF(tex_header, file.pc_name), "world", strlen("world") - 1)) gl_set->force_filter = true;
 
-		if(!strnicmp(VREF(tex_header, file.pc_name), "menu/usfont", strlen("menu/usfont") - 1))
+		if(!_strnicmp(VREF(tex_header, file.pc_name), "menu/usfont", strlen("menu/usfont") - 1))
 		{
 			gl_set->force_filter = true;
 			gl_set->force_zsort = true;
 		}
 
-		if(!strnicmp(VREF(tex_header, file.pc_name), "menu/btl_win", strlen("menu/btl_win") - 1)) gl_set->force_zsort = true;
+		if(!_strnicmp(VREF(tex_header, file.pc_name), "menu/btl_win", strlen("menu/btl_win") - 1)) gl_set->force_zsort = true;
 
-		if(!strnicmp(VREF(tex_header, file.pc_name), "flevel/hand_1", strlen("flevel/hand_1") - 1)) gl_set->force_filter = true;
+		if(!_strnicmp(VREF(tex_header, file.pc_name), "flevel/hand_1", strlen("flevel/hand_1") - 1)) gl_set->force_filter = true;
 	}
 
 	if(texture)
@@ -1641,7 +1641,7 @@ char *gldebug_severities[] = {
 	"Low",
 };
 
-void APIENTRY gldebug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid *userParam)
+void APIENTRY gldebug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid const *userParam)
 {
 	info("OpenGL debug; Severity: %s, %i %s %s: %s\n", gldebug_severities[severity - GL_DEBUG_SEVERITY_HIGH_ARB], id, gldebug_sources[source - GL_DEBUG_SOURCE_API_ARB], gldebug_types[type - GL_DEBUG_TYPE_ERROR_ARB], message);
 }
