@@ -306,7 +306,7 @@ uint lgp_get_filesize(struct lgp_file *file, uint lgp_num)
 	{
 		struct stat s;
 
-		fstat(file->fd->_file, &s);
+		fstat(_fileno(file->fd), &s);
 
 		return s.st_size;
 	}
@@ -492,7 +492,7 @@ uint get_filesize(struct ff7_file *file)
 	else
 	{
 		struct stat s;
-		fstat(file->fd->fd->_file, &s);
+		fstat(_fileno(file->fd->fd), &s);
 
 		return s.st_size;
 	}
@@ -541,8 +541,8 @@ char *make_pc_name(struct file_context *file_context, struct ff7_file *file, cha
 	{
 		if(ret[i] == '.')
 		{
-			if(!stricmp(&ret[i], ".tex")) ret[i] = 0;
-			else if(!stricmp(&ret[i], ".p")) ret[i] = 0;
+			if(!_stricmp(&ret[i], ".tex")) ret[i] = 0;
+			else if(!_stricmp(&ret[i], ".p")) ret[i] = 0;
 			else ret[i] = '_';
 		}
 	}
